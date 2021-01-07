@@ -2,41 +2,41 @@ package com.company.pl.coderslab.entity;
 
 public class User {
 
-    private static String id;
-    private static String email;
-    private static String username;
-    private static String password;
+    private int id;
+    private String userName;
+    private String email;
+    private String password;
 
-    public static String getId() {
+
+    public int getId() {
         return id;
     }
 
-    public static void setId(String id) {
-        User.id = id;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public static String getEmail() {
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getEmail() {
         return email;
     }
 
-    public static void setEmail(String email) {
-        User.email = email;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public static String getUsername() {
-        return username;
-    }
-
-    public static void setUsername(String username) {
-        User.username = username;
-    }
-
-    public static String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public static void setPassword(String password) {
-        User.password = password;
+    public void setPassword(String password) {
+        this.password = password;
     }
-
 }
