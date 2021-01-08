@@ -21,29 +21,13 @@ public class UserDao {
                     "PRIMARY KEY (ID)\n" +
                     ");";
 
-    private static final String CREATE_USER =
-            "INSERT INTO users(EMAIL, USER, PASSWORD) VALUES (?, ?, ?)";
-    private static final String READ_FROM_ID = "SELECT *FROM users WHERE ID = ?;";
-    private static final String UPDATE_DATA_USER =
-            "UPDATE users SET EMAIL = ?, USERNAME = ?, PASSWORD = ? where ID = ?;";
-    private static final String DELETED_DATA_USER = "DELETE FROM users WHERE ID = ?;";
-    private static final String SHOW_ALL_USERS = "SELECT *FROM users";
-
     public static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
+    private static final String CREATE_USER = "INSERT INTO users(EMAIL, USER, PASSWORD) VALUES (?, ?, ?)";
+
     public User create(User user) throws SQLException {
-        try (Connection conn = DbUtil.getConnection()) {
-            PreparedStatement preStmt = conn.prepareStatement(CREATE_USER, PreparedStatement.RETURN_GENERATED_KEYS);
-            {
-                ResultSet resultSet = preStmt.getGeneratedKeys();
-                if (resultSet.next()) {
-                    long id = resultSet.getLong(1);
-                    System.out.println("Inserted ID: " + id);
-                }
-            }
-        }
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(CREATE_USER, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, user.getEmail());
@@ -54,6 +38,11 @@ public class UserDao {
             if (resultSet.next()) {
                 user.setId(resultSet.getInt(1));
             }
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                System.out.println("Inserted ID: " + id);
+            }
             return user;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -61,7 +50,21 @@ public class UserDao {
         }
     }
 
-    public User read(int userID) {                                  // metoda nie zwraca prawidłowej wartosci
+    /*  Metoda "read" zwraca miejsce w pamięci. Przy próbie użycia w "main" kodu:
+
+     UserDao userDao = new UserDao();
+     User read = userDao.read(1);
+     System.out.println(read);
+
+      Metoda zwraca "com.company.pl.coderslab.entity.User@3cb1ffe6"
+
+      Link do repozytorium: https://github.com/Robert3107/DAO_Workshop.git
+      Ścieżka: DAO_Workshop/src/com/company/pl/coderslab/entity/UserDao
+    */
+
+    private static final String READ_FROM_ID = "SELECT * FROM users WHERE ID = ?;";
+
+    public User read(int userID) {
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(READ_FROM_ID);
             statement.setInt(1, userID);
@@ -79,4 +82,22 @@ public class UserDao {
         }
         return null;
     }
+
+    private static final String UPDATE_DATA_USER = "UPDATE users SET EMAIL = ?, USER= ?, PASSWORD = ? where ID = ?;";
+
+    public void update(User user) throws SQLException {
+        try (Connection conn = DbUtil.getConnection()) {
+            PreparedStatement statement = conn.prepareStatement(UPDATE_DATA_USER);
+            statement.setString(1, user.getEmail());
+            statement.setString(2, user.getUserName());
+            statement.setString(3, this.hashPassword(user.getPassword()));
+            statement.setInt(4, user.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static final String DELETED_DATA_USER = "DELETE FROM users WHERE ID = ?;";
+
 }
