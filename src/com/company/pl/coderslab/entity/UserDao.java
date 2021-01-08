@@ -2,31 +2,16 @@ package com.company.pl.coderslab.entity;
 
 import com.company.DbUtil;
 import org.mindrot.jbcrypt.BCrypt;
-
 import java.sql.*;
+import java.util.Arrays;
 
 public class UserDao {
-
-    private static final String CREATE_DATABASE =
-            "CREATE DATABASE DAO_WORKSHOP\n" +
-                    "CHARACTER SET UTF8MB4\n" +
-                    "COLLATE UTF8MB4_UNICODE_CI;";
-
-    private static final String CREATE_TABLE =
-            "CREATE TABLE workshop (\n" +
-                    "ID int AUTO_INCREMENT NOT NULL,\n" +
-                    "EMAIL VARCHAR(255) UNIQUE NOT NULL,\n" +
-                    "USER VARCHAR(255) NOT NULL,\n" +
-                    "PASSWORD VARCHAR(60) NOT NULL,\n" +
-                    "PRIMARY KEY (ID)\n" +
-                    ");";
 
     public static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     private static final String CREATE_USER = "INSERT INTO users(EMAIL, USER, PASSWORD) VALUES (?, ?, ?)";
-
     public User create(User user) throws SQLException {
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(CREATE_USER, Statement.RETURN_GENERATED_KEYS);
@@ -50,21 +35,15 @@ public class UserDao {
         }
     }
 
-    /*  Metoda "read" zwraca miejsce w pamięci. Przy próbie użycia w "main" kodu:
-
-     UserDao userDao = new UserDao();
-     User read = userDao.read(1);
-     System.out.println(read);
-
-      Metoda zwraca "com.company.pl.coderslab.entity.User@3cb1ffe6"
-
-      Link do repozytorium: https://github.com/Robert3107/DAO_Workshop.git
-      Ścieżka: DAO_Workshop/src/com/company/pl/coderslab/entity/UserDao
+    /*  Method "read" return place in memory. If try using method in "main".:
+        UserDao userDao = new UserDao();
+        User read = userDao.read(1);
+        System.out.println(read);
+        Return method and print in console "com.company.pl.coderslab.entity.User@3cb1ffe6"
     */
 
     private static final String READ_FROM_ID = "SELECT * FROM users WHERE ID = ?;";
-
-    public User read(int userID) {
+    public User read(int userID) throws SQLException {
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(READ_FROM_ID);
             statement.setInt(1, userID);
@@ -82,9 +61,15 @@ public class UserDao {
         }
         return null;
     }
+    public void readUser(int ID) throws SQLException {
+        UserDao userDao = new UserDao();
+        System.out.println("ID: " + userDao.read(ID).getId() + "\n" +
+                "Email: " + userDao.read(ID).getEmail() + "\n" +
+                "User: " + userDao.read(ID).getUserName() + "\n" +
+                "Password: " + userDao.read(ID).getPassword());
+    }
 
     private static final String UPDATE_DATA_USER = "UPDATE users SET EMAIL = ?, USER= ?, PASSWORD = ? where ID = ?;";
-
     public void update(User user) throws SQLException {
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(UPDATE_DATA_USER);
@@ -99,5 +84,41 @@ public class UserDao {
     }
 
     private static final String DELETED_DATA_USER = "DELETE FROM users WHERE ID = ?;";
+    public void deleted(int userID) throws SQLException {
+        try (Connection conn = DbUtil.getConnection()) {
+            PreparedStatement statement = conn.prepareStatement(DELETED_DATA_USER);
+            statement.setInt(1, userID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private static final String SHOW_ALL_USERS = "SELECT * FROM users";
+    private User[] addToArray(User u, User[] users) {
+        User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
+        tmpUsers[users.length] = u;
+        return tmpUsers;
+    }
+
+    //Method "showAll" return place in memory.
+    public User[] showAll() throws SQLException {
+        try (Connection conn = DbUtil.getConnection()) {
+            User[] users = new User[0];
+            PreparedStatement statement = conn.prepareStatement(SHOW_ALL_USERS);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("ID"));
+                user.setEmail(resultSet.getString("EMAIL"));
+                user.setUserName(resultSet.getString("USER"));
+                user.setPassword(resultSet.getString("PASSWORD"));
+                users = addToArray(user, users);
+            }
+            return users;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
