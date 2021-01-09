@@ -4,6 +4,7 @@ import com.company.DbUtil;
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class UserDao {
 
@@ -11,13 +12,22 @@ public class UserDao {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
+    Scanner scr = new Scanner(System.in);
+
     private static final String CREATE_USER = "INSERT INTO users(EMAIL, USER, PASSWORD) VALUES (?, ?, ?)";
+
     public User create(User user) throws SQLException {
+        System.out.println("Podaj email: ");
+        String email = scr.nextLine();
+        System.out.println("Podaj nazwę użytkownika: ");
+        String userName = scr.nextLine();
+        System.out.println("Podaj hasło: ");
+        String password = scr.nextLine();
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(CREATE_USER, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, user.getEmail());
-            statement.setString(2, user.getUserName());
-            statement.setString(3, hashPassword(user.getPassword()));
+            statement.setString(1, email);
+            statement.setString(2, userName);
+            statement.setString(3, hashPassword(password));
             statement.executeUpdate();
             ResultSet resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -26,7 +36,7 @@ public class UserDao {
             ResultSet rs = statement.getGeneratedKeys();
             if (rs.next()) {
                 long id = rs.getLong(1);
-                System.out.println("Inserted ID: " + id);
+                System.out.println("Dodano nowego użytkownika " + "\n" + "Nowe ID: " + id);
             }
             return user;
         } catch (SQLException e) {
@@ -35,14 +45,8 @@ public class UserDao {
         }
     }
 
-    /*  Method "read" return place in memory. If try using method in "main".:
-        UserDao userDao = new UserDao();
-        User read = userDao.read(1);
-        System.out.println(read);
-        Return method and print in console "com.company.pl.coderslab.entity.User@3cb1ffe6"
-    */
-
     private static final String READ_FROM_ID = "SELECT * FROM users WHERE ID = ?;";
+
     public User read(int userID) throws SQLException {
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(READ_FROM_ID);
@@ -61,40 +65,58 @@ public class UserDao {
         }
         return null;
     }
-    public void readUser(int ID) throws SQLException {
+    public void readUser() throws SQLException {
+
+        System.out.println("Podaj ID użytkownika: ");
+        int userID = scr.nextInt();
         UserDao userDao = new UserDao();
-        System.out.println("ID: " + userDao.read(ID).getId() + "\n" +
-                "Email: " + userDao.read(ID).getEmail() + "\n" +
-                "User: " + userDao.read(ID).getUserName() + "\n" +
-                "Password: " + userDao.read(ID).getPassword());
+        System.out.println("ID: " + userDao.read(userID).getId() + "\n" +
+                "Email: " + userDao.read(userID).getEmail() + "\n" +
+                "User: " + userDao.read(userID).getUserName() + "\n" +
+                "Password: " + userDao.read(userID).getPassword()
+        );
     }
 
     private static final String UPDATE_DATA_USER = "UPDATE users SET EMAIL = ?, USER= ?, PASSWORD = ? where ID = ?;";
+
     public void update(User user) throws SQLException {
+        System.out.println("Podaj nowy email: ");
+        String newEmail = scr.nextLine();
+        System.out.println("Podaj nową nazwę użytkownika: ");
+        String newUserName = scr.nextLine();
+        System.out.println("Podaj nowe hasło: ");
+        String newPassword = scr.nextLine();
+        System.out.println("Podaj ID użytkownika do aktualizacji: ");
+        int userID = scr.nextInt();
+
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(UPDATE_DATA_USER);
-            statement.setString(1, user.getEmail());
-            statement.setString(2, user.getUserName());
-            statement.setString(3, this.hashPassword(user.getPassword()));
-            statement.setInt(4, user.getId());
+            statement.setString(1, newEmail);
+            statement.setString(2, newUserName);
+            statement.setString(3, this.hashPassword(newPassword));
+            statement.setInt(4, userID);
             statement.executeUpdate();
+            System.out.println("Użytkownik zaktualizowany.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     private static final String DELETED_DATA_USER = "DELETE FROM users WHERE ID = ?;";
-    public void deleted(int userID) throws SQLException {
+
+    public void deleted() throws SQLException {
+        System.out.println("Podaj ID użytkownika: ");
+        int userID = scr.nextInt();
         try (Connection conn = DbUtil.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(DELETED_DATA_USER);
             statement.setInt(1, userID);
             statement.executeUpdate();
+            System.out.println("Użytkownik usunięty");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private static final String SHOW_ALL_USERS = "SELECT * FROM users";
     private User[] addToArray(User u, User[] users) {
         User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
         tmpUsers[users.length] = u;
@@ -102,6 +124,8 @@ public class UserDao {
     }
 
     //Method "showAll" return place in memory.
+
+    private static final String SHOW_ALL_USERS = "SELECT * FROM users";
     public User[] showAll() throws SQLException {
         try (Connection conn = DbUtil.getConnection()) {
             User[] users = new User[0];
