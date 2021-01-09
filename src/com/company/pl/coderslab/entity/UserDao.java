@@ -123,8 +123,6 @@ public class UserDao {
         return tmpUsers;
     }
 
-    //Method "showAll" return place in memory.
-
     private static final String SHOW_ALL_USERS = "SELECT * FROM users";
     public User[] showAll() throws SQLException {
         try (Connection conn = DbUtil.getConnection()) {

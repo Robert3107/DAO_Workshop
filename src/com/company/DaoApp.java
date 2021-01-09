@@ -4,6 +4,7 @@ import com.company.pl.coderslab.entity.User;
 import com.company.pl.coderslab.entity.UserDao;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class DaoApp {
@@ -35,7 +36,9 @@ public class DaoApp {
                     userDao.readUser();
                     break;
                 case SHOW_ALL:
-                    userDao.showAll();
+                    User[] users = userDao.showAll();
+                    String print= Arrays.toString(users);
+                    System.out.println(print);
                     break;
                 case UPDATE_DATA:
                     userDao.update(user);
@@ -55,7 +58,8 @@ public class DaoApp {
     }
 
     public static void printStart() {
-        String option = "\n" + "----------" + NAME_APP + "----------" + "\n" + "\n" + CREATE + " - Utwórz nowego użytkownika" + "\n"
+        String option = "\n" + "----------" + NAME_APP + "----------" + "\n" + "\n"
+                + CREATE + " - Utwórz nowego użytkownika" + "\n"
                 + READ_ID + " - Wyświetl użytkownika" + "\n"
                 + SHOW_ALL + " - Wyświetl wszystkich użytkowników" + "\n"
                 + UPDATE_DATA + " - Zaktualizuj użytkownika" + "\n"

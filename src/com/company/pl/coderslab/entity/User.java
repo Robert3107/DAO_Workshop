@@ -7,7 +7,6 @@ public class User {
     private String userName;
     private String password;
 
-
     public int getId() {
         return id;
     }
@@ -38,5 +37,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "Użytkownik: " + "\n" +
+                "ID: " + id + "\n" +
+                "Email: " + email + "\n" +
+                "Nazwa użytkownika: " + userName + "\n" +
+                "Hasło: " + password + "\n" + "\n";
     }
 }
