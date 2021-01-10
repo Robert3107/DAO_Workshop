@@ -72,8 +72,8 @@ public class UserDao {
         UserDao userDao = new UserDao();
         System.out.println("ID: " + userDao.read(userID).getId() + "\n" +
                 "Email: " + userDao.read(userID).getEmail() + "\n" +
-                "User: " + userDao.read(userID).getUserName() + "\n" +
-                "Password: " + userDao.read(userID).getPassword()
+                "Użytkownik: " + userDao.read(userID).getUserName() + "\n" +
+                "Hasło: " + userDao.read(userID).getPassword()
         );
     }
 
